@@ -10,5 +10,3 @@ opencv-python-headless==4.10.0.84
 tensorflow==2.15.0
 tensorflow-estimator==2.15.0
 tensorflow-io-gcs-filesystem==0.37.1
-tensorflow-macos==2.15.0
-tensorflow-metal==1.2.0
