@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Emotion Detector</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9fafb;
+            text-align: center;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 40px;
+            color: #333;
+        }
+
+        h2 {
+            font-size: 24px;
+            color: #666;
+            margin-top: 30px;
+        }
+
+        .container {
+            margin: auto;
+            width: 80%;
+            max-width: 900px;
+        }
+
+        .form-container, .video-section {
+            background: #fff;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        .form-container {
+            display: block;
+        }
+
+        .video-section {
+            display: none;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .btn {
+            border: none;
+            color: white;
+            background-color: #6c63ff;
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        input[type="submit"] {
+            padding: 10px 25px;
+            background-color: #574b90;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #3e3373;
+        }
+
+        select {
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .result-section {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .result-box {
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .result-box img {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .video-feed {
+            margin-top: 20px;
+            border: 3px solid #6c63ff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+    </style>
+
+<script>
+    function handleTaskChange() {
+        const selection = document.getElementById('task-select').value;
+        const uploadSection = document.getElementById('upload-section');
+        const videoSection = document.getElementById('video-section');
+
+        if (selection === "upload") {
+            uploadSection.style.display = "block";
+            videoSection.style.display = "none";
+        } else if (selection === "realtime") {
+            uploadSection.style.display = "none";
+            videoSection.style.display = "block";
+            clearResults();
+        }
+    }
+
+    function updateFileName(input) {
+        const fileName = input.files[0]?.name || "Choose a File";
+        document.getElementById("file-label").textContent = fileName;
+        clearResults(); // clear previous results when new file is selected
+    }
+
+    function clearResults() {
+        const resultSection = document.querySelector(".result-section");
+        if (resultSection) {
+            resultSection.innerHTML = ""; // clear the images
+        }
+    }
+
+    window.onload = function () {
+        const navigationType = performance.getEntriesByType("navigation")[0]?.type;
+
+    if (navigationType === "reload") {
+        clearResults();
+    }
+        handleTaskChange(); // set default view
+
+    };
+</script>
+
+</head>
+<body>
+    <h1>😄 Emotion Detection App</h1>
+    <p style="color: #777;">Upload an image or use your webcam to detect emotions</p>
+
+    <div class="container">
+        <select id="task-select" onchange="handleTaskChange()">
+            <option value="upload" selected>📷 Upload Image</option>
+            <option value="realtime">🎥 Real-Time Detection</option>
+        </select>
+
+        <!-- Upload Image Section -->
+        <div class="form-container" id="upload-section">
+            <h2>Upload Image</h2>
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <div class="upload-btn-wrapper">
+                    <button class="btn" type="button" id="file-label">Choose a File</button>
+                    <input type="file" name="image" required onchange="updateFileName(this)">
+                </div>
+                <br>
+                <input type="submit" value="Detect Emotion">
+            </form>
+
+            {% if result_image %}
+            <div class="result-section">
+                <div class="result-box">
+                    <h3>🖼️ Original Image</h3>
+                    <img src="{{ original_image }}" alt="Original Image">
+                </div>
+                <div class="result-box">
+                    <h3>🎯 Detected Emotion</h3>
+                    <img src="{{ result_image }}" alt="Detected Emotion">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Real-Time Detection Section -->
+        <div class="video-section" id="video-section">
+            <h2>Real-Time Detection</h2>
+            <p style="color: #888;">Allow webcam access to start real-time emotion detection.</p>
+            <img class="video-feed" src="{{ url_for('video_feed') }}" width="600">
+        </div>
+    </div>
+</body>
+</html>
